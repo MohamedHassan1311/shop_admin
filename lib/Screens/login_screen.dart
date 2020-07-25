@@ -2,8 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:progress_indicators/progress_indicators.dart';
 import 'package:provider/provider.dart';
-import 'package:shoping/Screens/signup_screen.dart';
 import 'package:shoping/provider/loginstat.dart';
 import 'package:shoping/provider/modelHud.dart';
 import 'package:shoping/servis/auth.dart';
@@ -11,21 +11,32 @@ import 'package:shoping/widgets/custom_textField.dart';
 
 import 'admin/adminHome.dart';
 
-class LoginScrren extends StatelessWidget {
-  final loginKey = GlobalKey<FormState>();
+class LoginScrren extends StatefulWidget {
   static String id = "/login";
-  String _email, _password;
+
+  @override
+  _LoginScrrenState createState() => _LoginScrrenState();
+}
+
+class _LoginScrrenState extends State<LoginScrren> {
+  final loginKey = GlobalKey<FormState>();
+
+  String _email, _password, _name;
+
   final auth = Auth();
+
   bool isAdmin = !true;
+
   final AdminPassworde = "123456";
+
+  bool _isLogIn = true;
 
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
+    final modelhud = Provider.of<ModelHud>(context, listen: false);
 //   / print(isLoged);
     return Scaffold(
-//      backgroundColor: Colors.purple,
-
       resizeToAvoidBottomPadding: false,
       body: Container(
         decoration: BoxDecoration(
@@ -34,6 +45,9 @@ class LoginScrren extends StatelessWidget {
               fit: BoxFit.cover),
         ),
         child: ModalProgressHUD(
+          progressIndicator: JumpingDotsProgressIndicator(
+            fontSize: 100.0,
+          ),
           inAsyncCall: Provider.of<ModelHud>(context).isLoding,
           child: Form(
             key: loginKey,
@@ -78,26 +92,6 @@ class LoginScrren extends StatelessWidget {
                         )
                       ],
                     ),
-//                    child: Stack(
-//                      alignment: Alignment.center,
-//                      children: <Widget>[
-//                        Image(
-//                          image: AssetImage("assets/images/icon.png"),
-//                        ),
-//                        Positioned(
-//                            bottom: 10,
-//                            child: Row(
-//                              children: <Widget>[
-//                                Text(
-//                                  "Life Market",
-//                                  style: TextStyle(
-//                                      fontSize: 20,
-//                                      fontWeight: FontWeight.w900),
-//                                ),
-//                              ],
-//                            )),
-//                      ],
-//                    ),
                   ),
                 ),
                 SizedBox(
@@ -107,12 +101,25 @@ class LoginScrren extends StatelessWidget {
                   padding: EdgeInsets.symmetric(horizontal: 30),
                   child: Column(
                     children: <Widget>[
+                      if (_isLogIn != true)
+                        CtextField(
+                          txtIcon: Icons.person,
+                          hint: "Enter Your Name",
+                          TextValue: (x) {
+                            _name = x;
+                          },
+                        ),
+                      if (_isLogIn != true)
+                        SizedBox(
+                          height: 5,
+                        ),
                       CtextField(
                         txtIcon: Icons.email,
                         hint: "Enter Your Email",
                         TextValue: (x) {
                           _email = x;
                         },
+                        KeyType: TextInputType.emailAddress,
                       ),
                       SizedBox(
                         height: 5,
@@ -123,6 +130,7 @@ class LoginScrren extends StatelessWidget {
                         TextValue: (x) {
                           _password = x;
                         },
+                        KeyType: TextInputType.visiblePassword,
                       )
                     ],
                   ),
@@ -134,13 +142,21 @@ class LoginScrren extends StatelessWidget {
                     padding: EdgeInsets.symmetric(horizontal: 120),
                     child: Builder(
                       builder: (context) => RaisedButton(
-                        child: Text(
-                          "Login",
-                          style: TextStyle(fontSize: 20, letterSpacing: 1),
-                        ),
-//                      textColor: Colors.white,
+                        child: modelhud.isLoding == false
+                            ? Text(
+                                _isLogIn == true ? "Log in" : "Sign Up",
+                                style:
+                                    TextStyle(fontSize: 20, letterSpacing: 1),
+                              )
+                            : JumpingDotsProgressIndicator(
+                                fontSize: 20.0,
+                              ),
                         onPressed: () async {
-                          _vildat(context);
+                          if (_isLogIn == true) {
+                            await _login(context);
+                          } else {
+                            await _SingUp(context);
+                          }
                         },
                         color: Colors.white54,
                         shape: RoundedRectangleBorder(
@@ -158,60 +174,18 @@ class LoginScrren extends StatelessWidget {
                       style: TextStyle(color: Colors.white),
                     ),
                     GestureDetector(
-                      onTap: () =>
-                          Navigator.pushNamed(context, SignupScreen.id),
+                      onTap: () {
+                        setState(() {
+                          _isLogIn = !_isLogIn;
+                        });
+                      },
                       child: Text(
-                        "signup",
+                        _isLogIn == true ? "Sign Up" : "Log In",
                         style: TextStyle(color: Colors.red),
                       ),
                     )
                   ],
                 ),
-//                Padding(
-//                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 20),
-//                  child: Row(
-//                    mainAxisAlignment: MainAxisAlignment.center,
-//                    children: <Widget>[
-//                      Expanded(
-//                        child: GestureDetector(
-//                          onTap: () {
-//                            Provider.of<AdminMode>(context, listen: false)
-//                                .changeIsAdmin(true);
-//
-////                          Navigator.pushNamed(context, SignupScreen.id);
-//                          },
-//                          child: Text(
-//                            "Admin",
-//                            style: TextStyle(
-//                              color: Provider.of<AdminMode>(context).isAdmin
-//                                  ? Colors.black12
-//                                  : Colors.red,
-//                            ),
-//                            textAlign: TextAlign.center,
-//                          ),
-//                        ),
-//                      ),
-//                      Expanded(
-//                          child: GestureDetector(
-//                        onTap: () {
-//                          Provider.of<AdminMode>(context, listen: false)
-//                              .changeIsAdmin(false);
-//
-////                        Navigator.pushNamed(context, SignupScreen.id);
-//                        },
-//                        child: Text(
-//                          "User",
-//                          style: TextStyle(
-//                            color: Provider.of<AdminMode>(context).isAdmin
-//                                ? Colors.red
-//                                : Colors.black12,
-//                          ),
-//                          textAlign: TextAlign.center,
-//                        ),
-//                      ))
-//                    ],
-//                  ),
-//                )
               ],
             ),
           ),
@@ -220,34 +194,18 @@ class LoginScrren extends StatelessWidget {
     );
   }
 
-  void _vildat(BuildContext context) async {
+  void _login(BuildContext context) async {
     loginKey.currentState.save();
     final modelhud = Provider.of<ModelHud>(context, listen: false);
     final loginStat = LoginStat();
     modelhud.ChangeIsLoding(true);
     if (loginKey.currentState.validate()) {
-      if (_password == AdminPassworde) {
-        try {
-          await auth.signIn(_email, _password);
-          modelhud.ChangeIsLoding(true);
-          Navigator.pushReplacementNamed(context, AdminHomeScreen.id);
-        } on PlatformException catch (e) {
-          modelhud.ChangeIsLoding(false);
-          Scaffold.of(context).showSnackBar(SnackBar(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-              side: BorderSide(color: Colors.purple, style: BorderStyle.solid),
-            ),
-            duration: Duration(seconds: 5),
-            content: Text(
-              e.message,
-              style: TextStyle(color: Colors.black),
-            ),
-            backgroundColor: Colors.white54,
-          ));
-        }
-      } else {
+      try {
+        await auth.signIn(_email, _password);
         modelhud.ChangeIsLoding(true);
+        Navigator.pushReplacementNamed(context, AdminHomeScreen.id);
+      } on PlatformException catch (e) {
+        modelhud.ChangeIsLoding(false);
         Scaffold.of(context).showSnackBar(SnackBar(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
@@ -255,12 +213,28 @@ class LoginScrren extends StatelessWidget {
           ),
           duration: Duration(seconds: 5),
           content: Text(
-            "Admin Password InValid!!",
+            e.message,
             style: TextStyle(color: Colors.black),
           ),
           backgroundColor: Colors.white54,
         ));
       }
+
+//      else {
+//        modelhud.ChangeIsLoding(true);
+//        Scaffold.of(context).showSnackBar(SnackBar(
+//          shape: RoundedRectangleBorder(
+//            borderRadius: BorderRadius.circular(20),
+//            side: BorderSide(color: Colors.purple, style: BorderStyle.solid),
+//          ),
+//          duration: Duration(seconds: 5),
+//          content: Text(
+//            "Admin Password InValid!!",
+//            style: TextStyle(color: Colors.black),
+//          ),
+//          backgroundColor: Colors.white54,
+//        ));
+//      }
 
 //      else {
 //        try {
@@ -287,5 +261,29 @@ class LoginScrren extends StatelessWidget {
       modelhud.ChangeIsLoding(false);
     }
     modelhud.ChangeIsLoding(false);
+  }
+
+  Future _SingUp(BuildContext context) async {
+    FocusScope.of(context).unfocus();
+    final modelHud = Provider.of<ModelHud>(context, listen: false);
+    modelHud.ChangeIsLoding(true);
+    if (loginKey.currentState.validate()) {
+      try {
+        loginKey.currentState.save();
+        final autthresult = await auth.signUp(_email, _password, _name);
+        modelHud.ChangeIsLoding(true);
+        setState(() {
+          // ignore: unnecessary_statements
+          _isLogIn = true;
+        });
+      } catch (e) {
+        Scaffold.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.message),
+          ),
+        );
+      }
+    }
+    modelHud.ChangeIsLoding(false);
   }
 }

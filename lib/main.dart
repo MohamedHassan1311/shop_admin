@@ -14,7 +14,6 @@ import 'Screens/admin/editAndDelet.dart';
 import 'Screens/admin/editProducts.dart';
 import 'Screens/admin/productsInApp.dart';
 import 'Screens/login_screen.dart';
-import 'Screens/signup_screen.dart';
 import 'enums/enum.dart';
 
 //void main() => runApp(DevicePreview(builder: (context) => MyApp()));
@@ -52,7 +51,6 @@ class MyApp extends StatelessWidget {
           EditAdmin.id: (context) => EditAdmin(),
           EditProduct.id: (context) => EditProduct(),
           LoginScrren.id: (c) => LoginScrren(),
-          SignupScreen.id: (context) => SignupScreen(),
         },
       ),
     );
